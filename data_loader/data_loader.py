@@ -3,7 +3,7 @@ import logging
 import numpy as np
 import tensorflow as tf
 
-from utils.general_utils import read_image
+from utils.general_utils import read_image , read_mask_image
 
 
 class DataLoader(object):
@@ -18,7 +18,8 @@ class DataLoader(object):
 
         self.ws_dataset = dataset.joinpath('ws')
         self.image_dataset = dataset.joinpath('images')
-
+        self.mask_dataset = dataset.joinpath('image_masks')
+		
         max_dir = max([x.name for x in self.image_dataset.iterdir()])
         self.max_ind = max([int(x.stem) for x in self.image_dataset.joinpath(max_dir).iterdir()])
         self.train_max_ind = args.train_data_size
@@ -54,9 +55,13 @@ class DataLoader(object):
                 img_path = self.real_dataset.joinpath(dir_name, img_name)
             else:
                 img_path = self.image_dataset.joinpath(dir_name, img_name)
+                mask_path = self.mask_dataset.joinpath(dir_name, img_name)
 
             try:
-                img = read_image(img_path, self.args.resolution)
+                img = read_image(img_path, self.args.resolution) 				
+                masked_img, land_img = read_mask_image(img_path, mask_path, self.args.resolution)
+				
+				
                 break
             except Exception as e:
                 self.logger.warning(f'Failed reading image at {ind}. Error: {e}')
@@ -67,7 +72,7 @@ class DataLoader(object):
                     raise IOError('Failed reading multiples images')
                 continue
 
-        return ind, img
+        return ind, img, masked_img , land_img
 
     def get_w_by_ind(self, ind):
         dir_name = f'{int(ind - ind % 1e3):05d}'
@@ -85,33 +90,38 @@ class DataLoader(object):
         ind = np.random.randint(0, self.max_ind)
         w = self.get_w_by_ind(ind)
 
-        return ind, w
+        return ind, w, w, w
 
     def batch_samples(self, get_sample_func, is_train, black_list=None, is_real=False):
         batch = []
+        masked_img_batch=[]
+        land_img_batch=[]
         indices = []
 
         if not black_list:
             black_list = []
         for i in range(self.args.batch_size):
-            ind, sample = get_sample_func(is_train, black_list, is_real)
+            ind, sample,sample_masked_img, sample_land_img  = get_sample_func(is_train, black_list, is_real)
 
             batch.append(sample)
+            masked_img_batch.append(sample_masked_img)
+            land_img_batch.append(sample_land_img)
             indices.append(ind)
 
         batch = tf.concat(batch, 0)
-
-        return indices, batch
+        masked_img_batch = tf.concat(masked_img_batch, 0)
+        land_img_batch = tf.concat(land_img_batch, 0)
+        return indices, batch, masked_img_batch, land_img_batch 
 
     def get_batch(self, is_train=True, is_cross=False, ws=True):
         black_list = []
-        id_imgs_indices, id_img = self.batch_samples(self.get_image, is_train)
+        id_imgs_indices, id_img, id_mask, id_land = self.batch_samples(self.get_image, is_train)
         matching_ws = None
 
         self.logger.debug(f'ID images read: {id_imgs_indices}')
         black_list.extend(id_imgs_indices)
 
-        if is_cross:
+        if is_cross: 
             # Use real attr when args say so or when testing
             is_real_attr = (is_train and self.args.train_real_attr) or (not is_train and self.args.test_real_attr)
             black_list = [] if is_real_attr else black_list
@@ -125,25 +135,25 @@ class DataLoader(object):
 
         else:
             if is_train:
-                attr_img = id_img
+                attr_img = id_land
                 matching_ws = [self.get_w_by_ind(ind) for ind in id_imgs_indices]
                 matching_ws = tf.concat(matching_ws, 0)
             else:
-                attr_img = id_img
+                attr_img = id_land
 
         if not is_train:
-            return attr_img, id_img
+            return id_land, id_img, id_mask
 
         # Only for training
         real_img = None
         real_ws = None
 
         if self.args.train and self.args.reals:
-            real_imgs_indices, real_img = self.batch_samples(self.get_image, is_train, black_list=[], is_real=True)
+            real_imgs_indices, real_img, real_img_mask, real_img_land = self.batch_samples(self.get_image, is_train, black_list=[], is_real=True)
             self.logger.debug(f'Real images read: {real_imgs_indices}')
 
         if ws:
-            _, real_ws = self.batch_samples(self.get_real_w, is_train)
+            _, real_ws,_,_ = self.batch_samples(self.get_real_w, is_train)
 
-        return attr_img, id_img, real_ws, real_img, matching_ws
+        return attr_img, id_img, id_mask, real_ws, real_img, matching_ws
 
