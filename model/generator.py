@@ -19,7 +19,6 @@ class G(Model):
         self.logger = logging.getLogger(__class__.__name__)
 
         self.id_encoder = id_encoder.IDEncoder(args, id_model_path)
-        self.id_encoder.trainable = False
 
         self.attr_encoder = attr_encoder.AttrEncoder(args)
 
@@ -60,5 +59,6 @@ class G(Model):
     def my_save(self, reason=''):
         self.attr_encoder.my_save(reason)
         self.latent_spaces_mapping.my_save(reason)
+        self.id_encoder.my_save(reason)
 
 
