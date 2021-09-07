@@ -98,3 +98,6 @@ class IDEncoder(Model):
             return embedding, intermediates
         else:
             return embedding
+    
+    def my_save(self, reason=''):
+        self.model.save_weights(str(self.args.weights_dir.joinpath(self.__class__.__name__ + reason + '.h5')))
