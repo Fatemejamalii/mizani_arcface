@@ -20,6 +20,9 @@ class IDEncoder(Model):
 
         self.model = tf.keras.Model(base_model.inputs, outputs)
 
+        if self.args.load_checkpoint:
+            self.model.load_weights(str(self.args.load_checkpoint.joinpath(self.__class__.__name__ + '.h5')))
+
 
     def crop_faces(self, img):
         ps = []
