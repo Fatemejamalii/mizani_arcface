@@ -154,6 +154,7 @@ class TestArgs(BaseArgs):
 
         self.parser.add_argument('--id_dir', type=Path)
         self.parser.add_argument('--attr_dir', type=Path)
+        self.parser.add_argument('--mask_dir', type=Path)
         self.parser.add_argument('--output_dir', type=Path)
         self.parser.add_argument('--input_dir', type=Path)
 
