@@ -120,7 +120,7 @@ class Trainer(object):
 
         # Forward that does not require grads
         id_embedding = self.model.G.id_encoder(id_mask)
-	id_embedding_for_loss = self.model.G.pretrained_id_encoder(id_mask)
+        id_embedding_for_loss = self.model.G.pretrained_id_encoder(id_mask)
         src_landmarks = self.model.G.landmarks(id_img)  
         attr_input = attr_img
 
