@@ -19,6 +19,9 @@ class G(Model):
         self.logger = logging.getLogger(__class__.__name__)
 
         self.id_encoder = id_encoder.IDEncoder(args, id_model_path)
+        
+        self.pretrained_id_encoder = pretrained_id_encoder.IDEncoder(args, id_model_path)
+        self.pretrained_id_encoder.trainable = False
 
         self.attr_encoder = attr_encoder.AttrEncoder(args)
 
