@@ -1,6 +1,7 @@
 import logging
 
 from model import id_encoder
+from model import pretrained_id_encoder
 from model import attr_encoder
 from model import latent_mapping
 from model import landmarks
