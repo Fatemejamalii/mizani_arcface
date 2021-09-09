@@ -264,11 +264,7 @@ class Trainer(object):
 
     # Test
     def test(self):
-        if self.num_epoch % 2000 == 0:
-            self.model.my_save(f'_my_save_epoch_{self.num_epoch}')
-		
-	
-	
+	self.model.my_save(f'_my_save_epoch_{self.num_epoch}')	
 
 
     def test_reconstruction(self, img, errors_dict, display=False, display_name=None):
