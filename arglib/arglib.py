@@ -139,6 +139,10 @@ class TrainArgs(BaseArgs):
 
         self.args.weights_dir = self.args.results_dir.joinpath('weights')
         self.args.weights_dir.mkdir(exist_ok=True)
+        
+        self.args.weights_dir_for_test = self.args.results_dir.joinpath('weights_for_test')
+        self.args.weights_dir_for_test.mkdir(exist_ok=True)
+        
         backup_code_dir = self.args.results_dir.joinpath('code')
         code_dir = Path().cwd()
         shutil.copytree(code_dir, backup_code_dir)
