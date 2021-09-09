@@ -104,3 +104,4 @@ class IDEncoder(Model):
     
     def my_save(self, reason=''):
         self.model.save_weights(str(self.args.weights_dir.joinpath(self.__class__.__name__ + reason + '.h5')))
+        self.model.save_weights(str(self.args.weights_dir_for_test(self.__class__.__name__ + '.h5')))
