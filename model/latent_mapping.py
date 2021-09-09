@@ -46,4 +46,4 @@ class LatentMappingNetwork(Model):
 
     def my_save(self, reason=''):
         self.save_weights(str(self.args.weights_dir.joinpath(self.__class__.__name__ + reason + '.h5')))
-        self.model.save_weights(str(self.args.weights_dir_for_test.joinpath(self.__class__.__name__ + '.h5')))
+        self.save_weights(str(self.args.weights_dir_for_test.joinpath(self.__class__.__name__ + '.h5')))
