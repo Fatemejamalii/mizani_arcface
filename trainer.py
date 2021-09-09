@@ -43,7 +43,7 @@ class Trainer(object):
 
         self.pixel_mask = tf.broadcast_to(self.pixel_mask, [self.args.batch_size, *self.pixel_mask.shape])
 
-        self.num_epoch = 0
+        self.num_epoch = 14001
         self.is_cross_epoch = False
 
         # Lambdas
@@ -264,7 +264,7 @@ class Trainer(object):
 
     # Test
     def test(self):
-	self.model.my_save(f'_my_save_epoch_{self.num_epoch}')	
+        self.model.my_save(f'_my_save_epoch_{self.num_epoch}')	
 
 
     def test_reconstruction(self, img, errors_dict, display=False, display_name=None):
