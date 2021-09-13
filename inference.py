@@ -58,6 +58,7 @@ class Inference(object):
                 continue
 
         id_img = utils.read_image(id_path[0], self.args.resolution)
+        gt_img = id_img
         mask_img , attr_img = utils.read_mask_image(id_path[0], mask_path[0], self.args.resolution)
 		
         out_img = self.G(mask_img, attr_img, id_img)[0]
@@ -69,10 +70,11 @@ class Inference(object):
 
         pred = (pred + 1) / 2
 
-        loss_function = self.pixel_loss_func(id_img, self.G.stylegan_s(w))
-        opt = tf.keras.optimizers.Adam(learning_rate=0.01, beta_1 =0.9, beta_2=0.999, epsilon=1e-8 ,name='Adam')
-        step_count = opt.minimize(loss_function , [w]).numpy()
-        print(w.numpy())
+         
+
+        optimizer = tf.keras.optimizers.Adam(learning_rate=0.01, beta_1 =0.9, beta_2=0.999, epsilon=1e-8 ,name='Adam')
+        train_op = optimizer.minimize(loss , [w]).numpy()
+        
 
         opt_pred = self.G.stylegan_s(w)
         opt_pred = (opt_pred + 1) / 2
