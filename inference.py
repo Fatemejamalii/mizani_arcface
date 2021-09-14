@@ -68,19 +68,23 @@ class Inference(object):
             w = self.G.latent_spaces_mapping(z_tag)
             pred = self.G.stylegan_s(w)
             pred = (pred + 1) / 2
-
+            w.trainable = True
             optimizer = tf.keras.optimizers.Adam(learning_rate=0.01, beta_1 =0.9, beta_2=0.999, epsilon=1e-8 ,name='Adam')
-            loss = tf.reduce_mean(tf.keras.losses.MAE(w, z))
+            loss = self.pixel_loss_func
 #             optr.minimize(loss , [w]).numpy()
         
 #             opt_pred = self.G.stylegan_s(w)
 #             opt_pred = (opt_pred + 1) / 2
             
-            for epoch in range(2):
+            for epoch in range(1000):
                 with tf.GradientTape() as tape:
-                    loss_value = loss(w , z_tag)
-                    grads = tape.gradient(loss_value, [w])
-                    optimizer.apply_gradients(zip(grads, [w]))
+                    tape.watch(w)
+                    loss_value = loss(gt_img , self.G.stylegan_s(w))
+                grads = tape.gradient(loss_value, [w])
+                optimizer.minimize(loss_value, [w])
+            
+            opt_pred = self.G.stylegan_s(w)
+            opt_pred = (pred + 1) / 2
 
             utils.save_image(pred, self.args.output_dir.joinpath(f'{img_name.name}'+'init'))
             utils.save_image(opt_pred, self.args.output_dir.joinpath(f'{img_name.name}'+'final'))
