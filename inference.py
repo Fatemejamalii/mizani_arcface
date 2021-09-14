@@ -81,7 +81,7 @@ class Inference(object):
                 
             
             opt_pred = self.G.stylegan_s(wp)
-            opt_pred = (opt_pred + 1) / 2
+#             opt_pred = (opt_pred + 1) / 2
 
             utils.save_image(pred, self.args.output_dir.joinpath(f'{img_name.name[:-4]}'+'_init.png'))
             utils.save_image(opt_pred, self.args.output_dir.joinpath(f'{img_name.name[:-4]}'+'_final.png'))
