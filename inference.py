@@ -6,6 +6,8 @@ from model import landmarks
 from writer import Writer
 from utils import general_utils as utils
 import pandas as pd
+from PIL import Image
+import numpy as np
 
 
 class Inference(object):
@@ -75,7 +77,11 @@ class Inference(object):
             wp = tf.Variable(w ,trainable=True)
             for epoch in range(5000):
                 with tf.GradientTape() as tape:
-                    loss_value = loss(gt_img , self.G.stylegan_s(wp))
+		    out_img = self.G.stylegan_s(wp)
+		    mask = Image.open(mask_path[0])
+                    mask = mask.convert('RGB')
+		    mask_out_img = np.asarray(out_img).astype(float) * np.asarray(mask).astype(float)
+                    loss_value = loss(mask_img ,mask_out_img)
                 grads = tape.gradient(loss_value, [wp])
                 optimizer.apply_gradients(zip(grads, [wp]))
                 
