@@ -69,12 +69,18 @@ class Inference(object):
             pred = self.G.stylegan_s(w)
             pred = (pred + 1) / 2
 
-            opt = tf.keras.optimizers.Adam(learning_rate=0.01, beta_1 =0.9, beta_2=0.999, epsilon=1e-8 ,name='Adam')
+            optimizer = tf.keras.optimizers.Adam(learning_rate=0.01, beta_1 =0.9, beta_2=0.999, epsilon=1e-8 ,name='Adam')
             loss = tf.reduce_mean(tf.keras.losses.MAE(w, z))
-            optr.minimize(loss , [w]).numpy()
+#             optr.minimize(loss , [w]).numpy()
         
-            opt_pred = self.G.stylegan_s(w)
-            opt_pred = (opt_pred + 1) / 2
+#             opt_pred = self.G.stylegan_s(w)
+#             opt_pred = (opt_pred + 1) / 2
+            
+            for epoch in range(2):
+                with tf.GradientTape() as tape:
+                    loss_value = loss(w , z_tag)
+                    grads = tape.gradient(loss_value, [w])
+                    optimizer.apply_gradients(zip(grads, [w]))
 
             utils.save_image(pred, self.args.output_dir.joinpath(f'{img_name.name}'+'init'))
             utils.save_image(opt_pred, self.args.output_dir.joinpath(f'{img_name.name}'+'final'))
