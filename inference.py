@@ -57,30 +57,27 @@ class Inference(object):
                 print(f'Could not find a single pair with name: {img_name.stem}')
                 continue
 
-        id_img = utils.read_image(id_path[0], self.args.resolution)
-        gt_img = id_img
-        mask_img , attr_img = utils.read_mask_image(id_path[0], mask_path[0], self.args.resolution)
+            id_img = utils.read_image(id_path[0], self.args.resolution)
+            gt_img = id_img
+            mask_img , attr_img = utils.read_mask_image(id_path[0], mask_path[0], self.args.resolution)
 		
-        out_img = self.G(mask_img, attr_img, id_img)[0]
-        id_embedding = out_img = self.G(mask_img, attr_img, id_img)[1]
-        attr_embedding = out_img = self.G(mask_img, attr_img, id_img)[2]			
-        z_tag = tf.concat([id_embedding, attr_embedding], -1)
-        w = self.G.latent_spaces_mapping(z_tag)
-        pred = self.G.stylegan_s(w)
+            out_img = self.G(mask_img, attr_img, id_img)[0]
+            id_embedding = self.G(mask_img, attr_img, id_img)[1]
+            attr_embedding = self.G(mask_img, attr_img, id_img)[2]			
+            z_tag = tf.concat([id_embedding, attr_embedding], -1)
+            w = self.G.latent_spaces_mapping(z_tag)
+            pred = self.G.stylegan_s(w)
+            pred = (pred + 1) / 2
 
-        pred = (pred + 1) / 2
-
-         
-
-        optimizer = tf.keras.optimizers.Adam(learning_rate=0.01, beta_1 =0.9, beta_2=0.999, epsilon=1e-8 ,name='Adam')
-        train_op = optimizer.minimize(loss , [w]).numpy()
+            opt = tf.keras.optimizers.Adam(learning_rate=0.01, beta_1 =0.9, beta_2=0.999, epsilon=1e-8 ,name='Adam')
+            loss = tf.reduce_mean(tf.keras.losses.MAE(w, z))
+            optr.minimize(loss , [w]).numpy()
         
+            opt_pred = self.G.stylegan_s(w)
+            opt_pred = (opt_pred + 1) / 2
 
-        opt_pred = self.G.stylegan_s(w)
-        opt_pred = (opt_pred + 1) / 2
-
-        utils.save_image(pred, self.args.output_dir.joinpath(f'{img_name.name}'+'init'))
-        utils.save_image(opt_pred, self.args.output_dir.joinpath(f'{img_name.name}'+'final'))
+            utils.save_image(pred, self.args.output_dir.joinpath(f'{img_name.name}'+'init'))
+            utils.save_image(opt_pred, self.args.output_dir.joinpath(f'{img_name.name}'+'final'))
 		
     def infer_on_dirs(self):
         attr_paths = list(self.args.attr_dir.iterdir())
