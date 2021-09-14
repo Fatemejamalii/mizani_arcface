@@ -68,26 +68,23 @@ class Inference(object):
             w = self.G.latent_spaces_mapping(z_tag)
             pred = self.G.stylegan_s(w)
             pred = (pred + 1) / 2
-            w.trainable = True
+            
             optimizer = tf.keras.optimizers.Adam(learning_rate=0.01, beta_1 =0.9, beta_2=0.999, epsilon=1e-8 ,name='Adam')
-            loss = self.pixel_loss_func
-#             optr.minimize(loss , [w]).numpy()
-        
-#             opt_pred = self.G.stylegan_s(w)
-#             opt_pred = (opt_pred + 1) / 2
+            loss =  tf.keras.losses.MeanAbsoluteError(tf.keras.losses.Reduction.SUM)
             
-            for epoch in range(1000):
+            wp = tf.Variable(w ,trainable=True)
+            for epoch in range(1):
                 with tf.GradientTape() as tape:
-                    tape.watch(w)
-                    loss_value = loss(gt_img , self.G.stylegan_s(w))
-                grads = tape.gradient(loss_value, [w])
-                optimizer.minimize(loss_value, [w])
+                    loss_value = loss(gt_img , self.G.stylegan_s(wp))
+                grads = tape.gradient(loss_value, [wp])
+                optimizer.apply_gradients(zip(grads, [wp]))
+                
             
-            opt_pred = self.G.stylegan_s(w)
+            opt_pred = self.G.stylegan_s(wp)
             opt_pred = (pred + 1) / 2
 
-            utils.save_image(pred, self.args.output_dir.joinpath(f'{img_name.name}'+'init'))
-            utils.save_image(opt_pred, self.args.output_dir.joinpath(f'{img_name.name}'+'final'))
+            utils.save_image(pred, self.args.output_dir.joinpath(f'{img_name.name[:-4]}'+'init.png'))
+            utils.save_image(opt_pred, self.args.output_dir.joinpath(f'{img_name.name[:-4]}'+'final.png'))
 		
     def infer_on_dirs(self):
         attr_paths = list(self.args.attr_dir.iterdir())
