@@ -48,7 +48,7 @@ class Inference(object):
 
     def opt_infer_pairs(self):
         names = [f for f in self.args.id_dir.iterdir() if f.suffix[1:] in self.args.img_suffixes]
-#         names.extend([f for f in self.args.attr_dir.iterdir() if f.suffix[1:] in self.args.img_suffixes])
+        names.extend([f for f in self.args.attr_dir.iterdir() if f.suffix[1:] in self.args.img_suffixes])
         for img_name in tqdm(names):
             id_path = utils.find_file_by_str(self.args.id_dir, img_name.stem)
             mask_path = utils.find_file_by_str(self.args.mask_dir, img_name.stem)
