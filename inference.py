@@ -8,6 +8,7 @@ from utils import general_utils as utils
 import pandas as pd
 from PIL import Image
 import numpy as np
+from matplotlib.image import imread 
 
 
 class Inference(object):
@@ -73,21 +74,27 @@ class Inference(object):
             
             optimizer = tf.keras.optimizers.Adam(learning_rate=0.01, beta_1 =0.9, beta_2=0.999, epsilon=1e-8 ,name='Adam')
             loss =  tf.keras.losses.MeanAbsoluteError(tf.keras.losses.Reduction.SUM)
-            
+            mask = Image.open(mask_path[0])
+            mask = mask.convert('RGB')
+            mask = np.asarray(mask).astype(float)/255.0
+            mask1 = np.asarray(mask).astype(float)  
+            # mask1 = np.expand_dims(mask1 , axis=0) 
+
             wp = tf.Variable(w ,trainable=True)
             for epoch in range(5000):
                 with tf.GradientTape() as tape:
-		    out_img = self.G.stylegan_s(wp)
-		    mask = Image.open(mask_path[0])
-                    mask = mask.convert('RGB')
-		    mask_out_img = np.asarray(out_img).astype(float) * np.asarray(mask).astype(float)
-                    loss_value = loss(mask_img ,mask_out_img)
+                    out_img = self.G.stylegan_s(wp) 
+                    out_img = (out_img + 1)  / 2 
+                    utils.save_image(out_img, self.args.output_dir.joinpath(f'{img_name.name[:-4]}'+'_out.png'))                        
+                    mask_out_img = out_img * mask1
+                    utils.save_image(mask_out_img, self.args.output_dir.joinpath(f'{img_name.name[:-4]}'+'_test.png'))
+                    loss_value = loss(mask_img ,mask_out_img)                    
                 grads = tape.gradient(loss_value, [wp])
                 optimizer.apply_gradients(zip(grads, [wp]))
                 
             
             opt_pred = self.G.stylegan_s(wp)
-#             opt_pred = (opt_pred + 1) / 2
+            opt_pred = (opt_pred + 1) / 2
 
             utils.save_image(pred, self.args.output_dir.joinpath(f'{img_name.name[:-4]}'+'_init.png'))
             utils.save_image(opt_pred, self.args.output_dir.joinpath(f'{img_name.name[:-4]}'+'_final.png'))
