@@ -85,10 +85,12 @@ class Inference(object):
                 with tf.GradientTape() as tape:
                     out_img = self.G.stylegan_s(wp) 
                     out_img = (out_img + 1)  / 2 
-                    utils.save_image(out_img, self.args.output_dir.joinpath(f'{img_name.name[:-4]}'+'_out.png'))                        
+                    # utils.save_image(out_img, self.args.output_dir.joinpath(f'{img_name.name[:-4]}'+'_out.png'))                        
                     mask_out_img = out_img * mask1
-                    utils.save_image(mask_out_img, self.args.output_dir.joinpath(f'{img_name.name[:-4]}'+'_test.png'))
-                    loss_value = loss(mask_img ,mask_out_img)                    
+                    # utils.save_image(mask_out_img, self.args.output_dir.joinpath(f'{img_name.name[:-4]}'+'_test.png'))
+                    # utils.save_image(mask_img, self.args.output_dir.joinpath(f'{img_name.name[:-4]}'+'_m.png'))
+                    loss_value = loss(mask_img ,mask_out_img)
+                                        
                 grads = tape.gradient(loss_value, [wp])
                 optimizer.apply_gradients(zip(grads, [wp]))
                 
