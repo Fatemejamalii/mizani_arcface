@@ -33,7 +33,7 @@ class DataLoader(object):
                 self.train_max_ind = self.max_ind
             else:
                 self.min_val_ind = self.train_max_ind + 1
-		else:
+        else:
             self.ws_dataset = dataset.joinpath('ws')
             max_dir = len(self.celeba_list)
             self.max_ind = max_dir
