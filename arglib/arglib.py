@@ -93,7 +93,7 @@ class TrainArgs(BaseArgs):
         super().add_args()
 
         self.parser.add_argument('--dataset_path', type=str, default='../my_dataset')
-        self.parser.add_argument('--celeba_list' , type=list)
+        self.parser.add_argument('--celeba_path' , type=str)
         self.parser.add_argument('--wich_dataset' , type=str)
 
         self.parser.add_argument('--num_epochs', type=int, default=math.inf)
