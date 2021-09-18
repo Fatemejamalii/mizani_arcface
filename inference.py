@@ -79,9 +79,10 @@ class Inference(object):
             mask = np.asarray(mask).astype(float)/255.0
             mask1 = np.asarray(mask).astype(float)  
             # mask1 = np.expand_dims(mask1 , axis=0) 
-
+	    loss_value = 0
             wp = tf.Variable(w ,trainable=True)
-            for epoch in range(5000):
+            for i in range(5000):
+		print('loss value is: {}.format(loss_value)')
                 with tf.GradientTape() as tape:
                     out_img = self.G.stylegan_s(wp) 
                     out_img = (out_img + 1)  / 2 
