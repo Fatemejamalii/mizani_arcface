@@ -13,24 +13,33 @@ class DataLoader(object):
         self.logger = logging.getLogger(self.__class__.__name__)
 
         self.real_dataset = args.dataset_path.joinpath(f'real')
+        self.celeba_list =  args.celeba_list
+        self.wich_dataset = args.wich_dataset
 
+        
         dataset = args.dataset_path.joinpath(f'dataset_{args.resolution}')
+        
+        if self.wich_dataset == 'dataset_256':
+            self.ws_dataset = dataset.joinpath('ws')
+            self.image_dataset = dataset.joinpath('images')
+            self.mask_dataset = dataset.joinpath('image_masks')
+            max_dir = max([x.name for x in self.image_dataset.iterdir()])
+            self.max_ind = max([int(x.stem) for x in self.image_dataset.joinpath(max_dir).iterdir()])
+            self.train_max_ind = args.train_data_size
 
-        self.ws_dataset = dataset.joinpath('ws')
-        self.image_dataset = dataset.joinpath('images')
-        self.mask_dataset = dataset.joinpath('image_masks')
-		
-        max_dir = max([x.name for x in self.image_dataset.iterdir()])
-        self.max_ind = max([int(x.stem) for x in self.image_dataset.joinpath(max_dir).iterdir()])
-        self.train_max_ind = args.train_data_size
-
-        if self.train_max_ind >= self.max_ind:
-            self.logger.warning('There is no validation data... using training data')
-            self.min_val_ind = 0
-            self.train_max_ind = self.max_ind
-        else:
-            self.min_val_ind = self.train_max_ind + 1
-
+            if self.train_max_ind >= self.max_ind:
+                self.logger.warning('There is no validation data... using training data')
+                self.min_val_ind = 0
+                self.train_max_ind = self.max_ind
+            else:
+                self.min_val_ind = self.train_max_ind + 1
+		else:
+            self.ws_dataset = dataset.joinpath('ws')
+            max_dir = len(self.celeba_list)
+            self.max_ind = max_dir
+            self.train_max_ind = max_dir
+            self.min_val_ind = max_dir + 1
+        
     def get_image(self, is_train, black_list=None, is_real=False):
         # Default should be non-mutable
         if black_list is None:
@@ -48,16 +57,21 @@ class DataLoader(object):
 
             if ind in black_list:
                 continue
-
-            img_name = f'{ind:05d}.png'
-            dir_name = f'{int(ind - ind % 1e3):05d}'
-            if is_real:
-                img_path = self.real_dataset.joinpath(dir_name, img_name)
+            if self.wich_dataset == 'dataset_256':
+                img_name = f'{ind:05d}.png'
+                dir_name = f'{int(ind - ind % 1e3):05d}'
+                if is_real:
+                    img_path = self.real_dataset.joinpath(dir_name, img_name)
+                else:
+                    img_path = self.image_dataset.joinpath(dir_name, img_name)
+                    mask_path = self.mask_dataset.joinpath(dir_name, img_name)
             else:
-                img_path = self.image_dataset.joinpath(dir_name, img_name)
-                mask_path = self.mask_dataset.joinpath(dir_name, img_name)
-
+                img_path = self.celeba_list[ind][0]
+                mask_path = self.celeba_list[ind][1]
+                
             try:
+                img_name = f'{ind:05d}.png'
+                dir_name = f'{int(ind - ind % 1e3):05d}'
                 img = read_image(img_path, self.args.resolution) 				
                 masked_img, land_img = read_mask_image(img_path, mask_path, self.args.resolution)
 				
