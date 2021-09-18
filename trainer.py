@@ -270,10 +270,14 @@ class Trainer(object):
         self.model.my_save(f'_my_save_epoch_{self.num_epoch}')	
         out_test = self.model.G(self.mask_test, self.attr_test, self.id_test)[0]
         image_test = tf.clip_by_value(out_test, 0, 1)
-        utils.save_image(image_test[0], self.args.images_results.joinpath(f'{self.num_epoch}_prediction_test.png'))
-        utils.save_image(self.mask_test[0], self.args.images_results.joinpath(f'{self.num_epoch}_id_test.png'))
-        utils.save_image(self.attr_test[0], self.args.images_results.joinpath(f'{self.num_epoch}_attr_test.png'))
-        utils.save_image(self.id_test[0], self.args.images_results.joinpath(f'{self.num_epoch}_gt_test.png'))
+        utils.save_image(image_test[0], self.args.images_results.joinpath(f'{self.num_epoch}_first_prediction_test.png'))
+        utils.save_image(self.mask_test[0], self.args.images_results.joinpath(f'first_id_test.png'))
+        utils.save_image(self.attr_test[0], self.args.images_results.joinpath(f'first_attr_test.png'))
+        utils.save_image(self.id_test[0], self.args.images_results.joinpath(f'first_gt_test.png'))
+        utils.save_image(image_test[1], self.args.images_results.joinpath(f'{self.num_epoch}_second_prediction_test.png'))
+        utils.save_image(self.mask_test[1], self.args.images_results.joinpath(f'second_id_test.png'))
+        utils.save_image(self.attr_test[1], self.args.images_results.joinpath(f'second_attr_test.png'))
+        utils.save_image(self.id_test[1], self.args.images_results.joinpath(f'second_gt_test.png'))
 
 
 
