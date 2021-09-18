@@ -15,6 +15,8 @@ class Trainer(object):
     def __init__(self, args, model, data_loader):
         self.args = args
         self.logger = logging.getLogger(__class__.__name__)
+        
+        self.attr_test, self.id_test, self.mask_test, self.real_w_test, self.real_test, self.matching_ws_test = self.data_loader.get_batch(is_cross=self.is_cross_epoch)
 
         self.model = model
         self.data_loader = data_loader
@@ -229,10 +231,10 @@ class Trainer(object):
                 (self.num_epoch < 1e3 and self.num_epoch % 1e2 == 0) or \
                 (self.num_epoch < 1e4 and self.num_epoch % 1e3 == 0) or \
                 (self.num_epoch % 1e4 == 0):
-            utils.save_image(pred[0], self.args.images_results.joinpath(f'{self.num_epoch}_prediction_step.png'))
-            utils.save_image(id_mask[0], self.args.images_results.joinpath(f'{self.num_epoch}_id_step.png'))
-            utils.save_image(attr_img[0], self.args.images_results.joinpath(f'{self.num_epoch}_attr_step.png'))
-            utils.save_image(id_img[0], self.args.images_results.joinpath(f'{self.num_epoch}_gt_step.png'))
+            utils.save_image(pred[0], self.args.images_results.joinpath(f'{self.num_epoch}_prediction.png'))
+            utils.save_image(id_mask[0], self.args.images_results.joinpath(f'{self.num_epoch}_id.png'))
+            utils.save_image(attr_img[0], self.args.images_results.joinpath(f'{self.num_epoch}_attr.png'))
+            utils.save_image(id_img[0], self.args.images_results.joinpath(f'{self.num_epoch}_gt.png'))
             
             Writer.add_image('input/id image', tf.expand_dims(id_mask[0], 0), step=self.num_epoch)
             Writer.add_image('Prediction', tf.expand_dims(pred[0], 0), step=self.num_epoch)
@@ -265,6 +267,12 @@ class Trainer(object):
     # Test
     def test(self):
         self.model.my_save(f'_my_save_epoch_{self.num_epoch}')	
+        out_test = (self.mask_test, self.attr_test, self.id_test)[0]	
+        utils.save_image(out_test, self.args.images_results.joinpath(f'{self.num_epoch}_prediction_test.png'))
+        utils.save_image(self.mask_test, self.args.images_results.joinpath(f'{self.num_epoch}_id_test.png'))
+        utils.save_image(self.attr_test, self.args.images_results.joinpath(f'{self.num_epoch}_attr_test.png'))
+        utils.save_image(self.id_test, self.args.images_results.joinpath(f'{self.num_epoch}_gt_test.png'))
+
 
 
     def test_reconstruction(self, img, errors_dict, display=False, display_name=None):
