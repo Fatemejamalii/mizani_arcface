@@ -15,11 +15,11 @@ class DataLoader(object):
         self.real_dataset = args.dataset_path.joinpath(f'real')
         self.wich_dataset = args.wich_dataset
         self.celeba_path =  args.celeba_path
-        trian_female = get_celeba_items((self.celeba_path.joinpath(f'female')))
-        train_male = get_celeba_items(self.celeba_path.joinpath(f'male'))
-        trian_mask = get_celeba_items(self.celeba_path.joinpath(f'train_mask'))
+        trian_female = self.get_celeba_items(self.celeba_path + '/female')
+        train_male = self.get_celeba_items(self.celeba_path + '/male')
+        trian_mask = self.get_celeba_items(self.celeba_path + '/train_mask')
         train_celeba = trian_female + train_male
-        self.celeba_list =  intersection(train_celeba, trian_mask)
+        self.celeba_list =  self.intersection(train_celeba, trian_mask)
         
         dataset = args.dataset_path.joinpath(f'dataset_{args.resolution}')
         
@@ -44,7 +44,7 @@ class DataLoader(object):
             self.train_max_ind = max_dir
             self.min_val_ind = max_dir + 1
     
-    def get_celeba_items(path):
+    def get_celeba_items(self,path):
         c_items = os.listdir(path)
         c_items.sort()
         items=[]
@@ -53,7 +53,7 @@ class DataLoader(object):
             items.append([it, item])
         return items
 
-    def intersection(lst1, lst2):
+    def intersection(self,lst1, lst2):
       lst3 = []
       for i, j in lst1:
         for k, h in lst2:
