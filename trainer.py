@@ -228,17 +228,17 @@ class Trainer(object):
             Writer.add_scalar('loss/pixel_loss', pixel_loss, step=self.num_epoch)
             Writer.add_scalar('loss/w_loss', w_loss, step=self.num_epoch)
 
-        if self.args.debug or \
-                (self.num_epoch < 1e3 and self.num_epoch % 1e2 == 0) or \
-                (self.num_epoch < 1e4 and self.num_epoch % 1e3 == 0) or \
-                (self.num_epoch % 1e4 == 0):
-            utils.save_image(pred[0], self.args.images_results.joinpath(f'{self.num_epoch}_prediction.png'))
-            utils.save_image(id_mask[0], self.args.images_results.joinpath(f'{self.num_epoch}_id.png'))
-            utils.save_image(attr_img[0], self.args.images_results.joinpath(f'{self.num_epoch}_attr.png'))
-            utils.save_image(id_img[0], self.args.images_results.joinpath(f'{self.num_epoch}_gt.png'))
+        # if self.args.debug or \
+        #         (self.num_epoch < 1e3 and self.num_epoch % 1e2 == 0) or \
+        #         (self.num_epoch < 1e4 and self.num_epoch % 1e3 == 0) or \
+        #         (self.num_epoch % 1e4 == 0):
+        #     utils.save_image(pred[0], self.args.images_results.joinpath(f'{self.num_epoch}_prediction.png'))
+        #     utils.save_image(id_mask[0], self.args.images_results.joinpath(f'{self.num_epoch}_id.png'))
+        #     utils.save_image(attr_img[0], self.args.images_results.joinpath(f'{self.num_epoch}_attr.png'))
+        #     utils.save_image(id_img[0], self.args.images_results.joinpath(f'{self.num_epoch}_gt.png'))
             
-            Writer.add_image('input/id image', tf.expand_dims(id_mask[0], 0), step=self.num_epoch)
-            Writer.add_image('Prediction', tf.expand_dims(pred[0], 0), step=self.num_epoch)
+        #     Writer.add_image('input/id image', tf.expand_dims(id_mask[0], 0), step=self.num_epoch)
+        #     Writer.add_image('Prediction', tf.expand_dims(pred[0], 0), step=self.num_epoch)
 
         if total_g_not_gan_loss != 0:
             g_grads = g_tape.gradient(total_g_not_gan_loss, self.model.G.trainable_variables)
