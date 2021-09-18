@@ -268,7 +268,7 @@ class Trainer(object):
     # Test
     def test(self):
         self.model.my_save(f'_my_save_epoch_{self.num_epoch}')	
-        out_test = (self.mask_test, self.attr_test, self.id_test)[0]	
+        out_test = self.model.G(self.mask_test, self.attr_test, self.id_test)[0]	
         utils.save_image(out_test, self.args.images_results.joinpath(f'{self.num_epoch}_prediction_test.png'))
         utils.save_image(self.mask_test, self.args.images_results.joinpath(f'{self.num_epoch}_id_test.png'))
         utils.save_image(self.attr_test, self.args.images_results.joinpath(f'{self.num_epoch}_attr_test.png'))
