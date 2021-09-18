@@ -49,8 +49,8 @@ class DataLoader(object):
         c_items.sort()
         items=[]
         for it in c_items:
-        item = (os.path.join(path, it))
-        items.append([it, item])
+            item = (os.path.join(path, it))
+            items.append([it, item])
         return items
 
     def intersection(lst1, lst2):
