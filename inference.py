@@ -100,8 +100,7 @@ class Inference(object):
 
             utils.save_image(pred, self.args.output_dir.joinpath(f'{img_name.name[:-4]}'+'_init.png'))
             utils.save_image(opt_pred, self.args.output_dir.joinpath(f'{img_name.name[:-4]}'+'_final.png'))
-            utils.save_image(mask_img, self.args.output_dir.joinpath(f'{img_name.name[:-4]}'+'_mask.png'))
-            utils.save_image(attr_img, self.args.output_dir.joinpath(f'{img_name.name[:-4]}'+'_attr.png'))
+            utils.save_image(id_img, self.args.output_dir.joinpath(f'{img_name.name[:-4]}'+'_gt.png'))
 		
     def infer_on_dirs(self):
         attr_paths = list(self.args.attr_dir.iterdir())
