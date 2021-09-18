@@ -82,7 +82,7 @@ class Inference(object):
             loss_value = 0
             wp = tf.Variable(w ,trainable=True)
             for i in range(5000):
-                print('loss value is: {}'.format(loss_value))
+                print('iteration:{0}   loss value is: {1}'.format(i,loss_value))
                 with tf.GradientTape() as tape:
                     out_img = self.G.stylegan_s(wp) 
                     out_img = (out_img + 1)  / 2 
