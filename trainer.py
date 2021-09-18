@@ -21,7 +21,7 @@ class Trainer(object):
         self.model = model
         self.data_loader = data_loader
 
-        self.attr_test, self.id_test, self.mask_test, self.real_w_test, self.real_test, self.matching_ws_test = self.data_loader.get_batch(is_cross=self.is_cross_epoch)
+        self.attr_test, self.id_test, self.mask_test, self.real_w_test, self.real_test, self.matching_ws_test = self.data_loader.get_batch(is_cross=False)
         # lrs & optimizers
         lr = 5e-5 if self.args.resolution == 256 else 1e-5
 
