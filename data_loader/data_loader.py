@@ -1,5 +1,5 @@
 import logging
-
+import os
 import numpy as np
 import tensorflow as tf
 
@@ -11,11 +11,15 @@ class DataLoader(object):
         super().__init__()
         self.args = args
         self.logger = logging.getLogger(self.__class__.__name__)
-
+        
         self.real_dataset = args.dataset_path.joinpath(f'real')
-        self.celeba_list =  args.celeba_list
         self.wich_dataset = args.wich_dataset
-
+        self.celeba_path =  args.celeba_path
+        trian_female = get_celeba_items(self.celeba_path.joinpath(female))
+        train_male = get_celeba_items(self.celeba_path.joinpath(male))
+        trian_mask = get_celeba_items(self.celeba_path.joinpath(train_mask))
+        train_celeba = trian_female + train_male
+        self.celeba_list =  intersection(train_celeba, trian_mask)
         
         dataset = args.dataset_path.joinpath(f'dataset_{args.resolution}')
         
@@ -39,6 +43,23 @@ class DataLoader(object):
             self.max_ind = max_dir
             self.train_max_ind = max_dir
             self.min_val_ind = max_dir + 1
+    
+    def get_celeba_items(path):
+        c_items = os.listdir(path)
+        c_items.sort()
+        items=[]
+        for it in c_items:
+        item = (os.path.join(path, it))
+        items.append([it, item])
+        return items
+
+    def intersection(lst1, lst2):
+      lst3 = []
+      for i, j in lst1:
+        for k, h in lst2:
+          if i==k:
+            lst3.append([j, h])  
+      return lst3
         
     def get_image(self, is_train, black_list=None, is_real=False):
         # Default should be non-mutable
