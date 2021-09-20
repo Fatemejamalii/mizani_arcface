@@ -60,11 +60,11 @@ def main():
 
     Writer.set_writer(args.results_dir)
 
-    if not args.debug:
-        description = input('Please write a short description of this run\n')
-        desc_file = args.results_dir.joinpath('description.txt')
-        with desc_file.open('w') as f:
-            f.write(description)
+#     if not args.debug:
+#         description = input('Please write a short description of this run\n')
+#         desc_file = args.results_dir.joinpath('description.txt')
+#         with desc_file.open('w') as f:
+#             f.write(description)
 
     id_model_path = args.pretrained_models_path.joinpath('vggface2.h5')
     stylegan_G_synthesis_path = str(
