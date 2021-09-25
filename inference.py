@@ -78,6 +78,7 @@ class Inference(object):
             mask = mask.convert('RGB')
             mask = np.asarray(mask).astype(float)/255.0
             mask1 = np.asarray(mask).astype(float)  
+            mask1.resize((256,256))
             # mask1 = np.expand_dims(mask1 , axis=0) 
             loss_value = 0
             wp = tf.Variable(w ,trainable=True)
