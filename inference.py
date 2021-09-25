@@ -76,9 +76,9 @@ class Inference(object):
             loss =  tf.keras.losses.MeanAbsoluteError(tf.keras.losses.Reduction.SUM)
             mask = Image.open(mask_path[0])
             mask = mask.convert('RGB')
+            mask = mask.resize((256,256))
             mask = np.asarray(mask).astype(float)/255.0
             mask1 = np.asarray(mask).astype(float)  
-            mask1.resize((256,256))
             # mask1 = np.expand_dims(mask1 , axis=0) 
             loss_value = 0
             wp = tf.Variable(w ,trainable=True)
