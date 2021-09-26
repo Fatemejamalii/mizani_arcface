@@ -241,8 +241,7 @@ class Trainer(object):
         #     Writer.add_image('input/id image', tf.expand_dims(id_mask[0], 0), step=self.num_epoch)
         #     Writer.add_image('Prediction', tf.expand_dims(pred[0], 0), step=self.num_epoch)
 
-        wandb.log({"epoch": self.num_epoch, "id_loss": id_loss,"Lnd_loss": landmarks_loss,"l1_loss": l1_loss,"pixel_loss":pixel_loss,"total_g_not_gan_loss":total_g_not_gan_loss,"g_w_gan_loss":g_w_gan_loss})
-
+        wandb.log({"epoch": self.num_epoch, "id_loss": id_loss,"Lnd_loss": landmarks_loss,"l1_loss": l1_loss,"pixel_loss":pixel_loss,"total_g_not_gan_loss":total_g_not_gan_loss,"g_w_gan_loss":g_w_gan_loss, "gt_img": wandb.Image(id_img) ,  "mask_img": wandb.Image(mask_img) ,  "pred_img": wandb.Image(pred)})
         
         if total_g_not_gan_loss != 0:
             g_grads = g_tape.gradient(total_g_not_gan_loss, self.model.G.trainable_variables)
@@ -272,7 +271,7 @@ class Trainer(object):
     # Test
     def test(self):
         self.model.my_save(f'_my_save_epoch_{self.num_epoch}')	
-        out_test = self.model.G(self.mask_test, self.id_test, self.id_test)[0]
+        out_test = self.model.G(self.mask_test, self.mask_test, self.id_test)[0]
         image_test = tf.clip_by_value(out_test, 0, 1)
         utils.save_image(image_test[0], self.args.images_results.joinpath(f'{self.num_epoch}_first_prediction_test.png'))
         utils.save_image(self.mask_test[0], self.args.images_results.joinpath(f'first_id_test.png'))
