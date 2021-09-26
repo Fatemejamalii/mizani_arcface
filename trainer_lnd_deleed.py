@@ -17,7 +17,7 @@ class Trainer(object):
         self.logger = logging.getLogger(__class__.__name__)
         
           #WandB
-        wandb.init(project="celeba_training_lnd_deleted_1")
+        wandb.init(project="celeba_training_lnd_deleted_2")
 
         self.model = model
         self.data_loader = data_loader
@@ -241,7 +241,7 @@ class Trainer(object):
         #     Writer.add_image('input/id image', tf.expand_dims(id_mask[0], 0), step=self.num_epoch)
         #     Writer.add_image('Prediction', tf.expand_dims(pred[0], 0), step=self.num_epoch)
 
-        wandb.log({"epoch": self.num_epoch, "id_loss": id_loss,"Lnd_loss": landmarks_loss,"l1_loss": l1_loss,"pixel_loss":pixel_loss,"total_g_not_gan_loss":total_g_not_gan_loss,"g_w_gan_loss":g_w_gan_loss, "gt_img": wandb.Image(id_img) ,  "mask_img": wandb.Image(mask_img) ,  "pred_img": wandb.Image(pred)})
+        wandb.log({"epoch": self.num_epoch, "id_loss": id_loss,"Lnd_loss": landmarks_loss,"l1_loss": l1_loss,"pixel_loss":pixel_loss,"total_g_not_gan_loss":total_g_not_gan_loss,"g_w_gan_loss":g_w_gan_loss, "gt_img": wandb.Image(id_img[0]) ,  "mask_img": wandb.Image(id_mask[0]) ,  "pred_img": wandb.Image(pred[0])})
         
         if total_g_not_gan_loss != 0:
             g_grads = g_tape.gradient(total_g_not_gan_loss, self.model.G.trainable_variables)
