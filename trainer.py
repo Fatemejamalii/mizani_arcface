@@ -17,7 +17,7 @@ class Trainer(object):
         self.logger = logging.getLogger(__class__.__name__)
         
           #WandB
-        wandb.init(project="CelebA_test_06_30_21")
+        wandb.init(project="CelebA_original_without_WD")
 
         self.model = model
         self.data_loader = data_loader
@@ -47,7 +47,7 @@ class Trainer(object):
 
         self.pixel_mask = tf.broadcast_to(self.pixel_mask, [self.args.batch_size, *self.pixel_mask.shape])
 
-        self.num_epoch = 66000
+        self.num_epoch = 0
         self.is_cross_epoch = False
 
         # Lambdas
@@ -229,19 +229,8 @@ class Trainer(object):
             Writer.add_scalar('loss/pixel_loss', pixel_loss, step=self.num_epoch)
             Writer.add_scalar('loss/w_loss', w_loss, step=self.num_epoch)
 
-        # if self.args.debug or \
-        #         (self.num_epoch < 1e3 and self.num_epoch % 1e2 == 0) or \
-        #         (self.num_epoch < 1e4 and self.num_epoch % 1e3 == 0) or \
-        #         (self.num_epoch % 1e4 == 0):
-        #     utils.save_image(pred[0], self.args.images_results.joinpath(f'{self.num_epoch}_prediction.png'))
-        #     utils.save_image(id_mask[0], self.args.images_results.joinpath(f'{self.num_epoch}_id.png'))
-        #     utils.save_image(attr_img[0], self.args.images_results.joinpath(f'{self.num_epoch}_attr.png'))
-        #     utils.save_image(id_img[0], self.args.images_results.joinpath(f'{self.num_epoch}_gt.png'))
-            
-        #     Writer.add_image('input/id image', tf.expand_dims(id_mask[0], 0), step=self.num_epoch)
-        #     Writer.add_image('Prediction', tf.expand_dims(pred[0], 0), step=self.num_epoch)
-
-        wandb.log({"epoch": self.num_epoch, "id_loss": id_loss,"Lnd_loss": landmarks_loss,"l1_loss": l1_loss,"pixel_loss":pixel_loss,"total_g_not_gan_loss":total_g_not_gan_loss,"g_w_gan_loss":g_w_gan_loss, "gt_img": wandb.Image(id_img[0]) ,  "mask_img": wandb.Image(id_mask[0]) ,  "pred_img": wandb.Image(pred[0])})
+        if self.num_epoch%100==0:
+            wandb.log({"epoch": self.num_epoch, "id_loss": id_loss,"Lnd_loss": landmarks_loss,"l1_loss": l1_loss,"pixel_loss":pixel_loss,"total_g_not_gan_loss":total_g_not_gan_loss,"g_w_gan_loss":g_w_gan_loss, "gt_img": wandb.Image(id_img[0]) ,  "mask_img": wandb.Image(id_mask[0]) ,  "pred_img": wandb.Image(pred[0])})
 
         
         if total_g_not_gan_loss != 0:
