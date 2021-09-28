@@ -17,7 +17,7 @@ class Trainer(object):
         self.logger = logging.getLogger(__class__.__name__)
         
           #WandB
-        wandb.init(project="celeba_training_lnd_deleted_2")
+        wandb.init(project="CelebA_attr_same_id_is_eyes_0")
 
         self.model = model
         self.data_loader = data_loader
@@ -126,7 +126,9 @@ class Trainer(object):
         id_embedding = self.model.G.id_encoder(id_mask)
         id_embedding_for_loss = self.model.G.pretrained_id_encoder(id_mask)
         src_landmarks = self.model.G.landmarks(id_img)  
+
         attr_input = id_mask
+ 
 
         with tf.GradientTape(persistent=True) as g_tape:
 
@@ -228,20 +230,9 @@ class Trainer(object):
         if not self.is_cross_epoch:
             Writer.add_scalar('loss/pixel_loss', pixel_loss, step=self.num_epoch)
             Writer.add_scalar('loss/w_loss', w_loss, step=self.num_epoch)
+        if self.num_epoch%100==0:
+            wandb.log({"epoch": self.num_epoch, "id_loss": id_loss,"Lnd_loss": landmarks_loss,"l1_loss": l1_loss,"pixel_loss":pixel_loss,"total_g_not_gan_loss":total_g_not_gan_loss,"g_w_gan_loss":g_w_gan_loss, "gt_img": wandb.Image(id_img[0]) ,  "mask_img": wandb.Image(id_mask[0]) ,  "pred_img": wandb.Image(pred[0])})
 
-        # if self.args.debug or \
-        #         (self.num_epoch < 1e3 and self.num_epoch % 1e2 == 0) or \
-        #         (self.num_epoch < 1e4 and self.num_epoch % 1e3 == 0) or \
-        #         (self.num_epoch % 1e4 == 0):
-        #     utils.save_image(pred[0], self.args.images_results.joinpath(f'{self.num_epoch}_prediction.png'))
-        #     utils.save_image(id_mask[0], self.args.images_results.joinpath(f'{self.num_epoch}_id.png'))
-        #     utils.save_image(attr_img[0], self.args.images_results.joinpath(f'{self.num_epoch}_attr.png'))
-        #     utils.save_image(id_img[0], self.args.images_results.joinpath(f'{self.num_epoch}_gt.png'))
-            
-        #     Writer.add_image('input/id image', tf.expand_dims(id_mask[0], 0), step=self.num_epoch)
-        #     Writer.add_image('Prediction', tf.expand_dims(pred[0], 0), step=self.num_epoch)
-
-        wandb.log({"epoch": self.num_epoch, "id_loss": id_loss,"Lnd_loss": landmarks_loss,"l1_loss": l1_loss,"pixel_loss":pixel_loss,"total_g_not_gan_loss":total_g_not_gan_loss,"g_w_gan_loss":g_w_gan_loss, "gt_img": wandb.Image(id_img[0]) ,  "mask_img": wandb.Image(id_mask[0]) ,  "pred_img": wandb.Image(pred[0])})
         
         if total_g_not_gan_loss != 0:
             g_grads = g_tape.gradient(total_g_not_gan_loss, self.model.G.trainable_variables)
@@ -271,16 +262,13 @@ class Trainer(object):
     # Test
     def test(self):
         self.model.my_save(f'_my_save_epoch_{self.num_epoch}')	
-        out_test = self.model.G(self.mask_test, self.mask_test, self.id_test)[0]
+        out_test = self.model.G(self.mask_test, self.attr_test, self.id_test)[0]
         image_test = tf.clip_by_value(out_test, 0, 1)
         utils.save_image(image_test[0], self.args.images_results.joinpath(f'{self.num_epoch}_first_prediction_test.png'))
         utils.save_image(self.mask_test[0], self.args.images_results.joinpath(f'first_id_test.png'))
-        # utils.save_image(self.attr_test[0], self.args.images_results.joinpath(f'first_attr_test.png'))
+        utils.save_image(self.mask_test[0], self.args.images_results.joinpath(f'first_attr_test.png'))
         utils.save_image(self.id_test[0], self.args.images_results.joinpath(f'first_gt_test.png'))
-        utils.save_image(image_test[1], self.args.images_results.joinpath(f'{self.num_epoch}_second_prediction_test.png'))
-        utils.save_image(self.mask_test[1], self.args.images_results.joinpath(f'second_id_test.png'))
-        # utils.save_image(self.attr_test[1], self.args.images_results.joinpath(f'second_attr_test.png'))
-        utils.save_image(self.id_test[1], self.args.images_results.joinpath(f'second_gt_test.png'))
+    
 
 
 
