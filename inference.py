@@ -89,6 +89,8 @@ class Inference(object):
                     out_img = (out_img + 1)  / 2 
                     # utils.save_image(out_img, self.args.output_dir.joinpath(f'{img_name.name[:-4]}'+'_out.png'))                        
                     mask_out_img = out_img * mask1
+                    if i%200==0:
+                        utils.save_image(out_img , self.args.output_dir.joinpath(f'{img_name.name[:-4]}' + '_out_{0}.png'.format(i)))
                     # utils.save_image(mask_out_img, self.args.output_dir.joinpath(f'{img_name.name[:-4]}'+'_test.png'))
                     # utils.save_image(mask_img, self.args.output_dir.joinpath(f'{img_name.name[:-4]}'+'_m.png'))
                     loss_value = loss(mask_img ,mask_out_img)
