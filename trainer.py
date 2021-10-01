@@ -15,9 +15,14 @@ class Trainer(object):
     def __init__(self, args, model, data_loader):
         self.args = args
         self.logger = logging.getLogger(__class__.__name__)
-        
+        self.id_ll=[]
+        self.mssim_ll=[]
+        self.lnd_ll=[]
+        self.l1_ll=[]
+        self.total_ll=[]
+        self.pixel_ll=[]
           #WandB
-        wandb.init(project="CelebA_original_without_WD")
+        wandb.init(project="CelebA_original_without_WD_4")
 
         self.model = model
         self.data_loader = data_loader
@@ -47,7 +52,7 @@ class Trainer(object):
 
         self.pixel_mask = tf.broadcast_to(self.pixel_mask, [self.args.batch_size, *self.pixel_mask.shape])
 
-        self.num_epoch = 0
+        self.num_epoch = 29000
         self.is_cross_epoch = False
 
         # Lambdas
@@ -56,7 +61,7 @@ class Trainer(object):
         else:
             self.lambda_gan = 1
 
-        self.lambda_pixel = 0.02
+        self.lambda_pixel = 1
 
         self.lambda_id = 1
         self.lambda_attr_id = 1
@@ -173,20 +178,21 @@ class Trainer(object):
                 pred_id_embedding = self.model.G.id_encoder(pred)
                 id_loss = self.lambda_id * id_loss_func(pred_id_embedding, tf.stop_gradient(id_embedding_for_loss))
                 self.logger.info(f'id loss is {id_loss:.3f}')
-
+                self.id_ll.append(id_loss)
             if self.args.landmarks_loss:
                 try:
                     dst_landmarks = self.model.G.landmarks(pred)
                 except Exception as e:
                     self.logger.warning(f'Failed finding landmarks on prediction. Dont use landmarks loss. Error:{e}')
                     dst_landmarks = None
-
+               
                 if dst_landmarks is None or src_landmarks is None:
                     landmarks_loss = 0
                 else:
                     landmarks_loss = self.lambda_landmarks * \
                                      tf.reduce_mean(tf.keras.losses.MSE(src_landmarks, dst_landmarks))
                     self.logger.info(f'landmarks loss is: {landmarks_loss:.3f}')
+                self.lnd_ll.append(landmarks_loss)
                     # if landmarks_loss > 5:
                     #     landmarks_loss = 0
                     #     id_loss = 0
@@ -194,15 +200,18 @@ class Trainer(object):
             if not self.is_cross_epoch and self.args.pixel_loss:
                 l1_loss = self.pixel_loss_func(id_img, pred, sample_weight=self.pixel_mask)
                 self.logger.info(f'L1 pixel loss is {l1_loss:.3f}')
-
+                self.l1_ll.append(l1_loss)
                 if self.args.pixel_loss_type == 'mix':
                     mssim = tf.reduce_mean(1 - tf.image.ssim_multiscale(id_img, pred, 1.0))
+                    self.mssim_ll.append(mssim)
                     self.logger.info(f'mssim loss is {l1_loss:.3f}')
                     pixel_loss = self.lambda_pixel * (0.84 * mssim + 0.16 * l1_loss)
                 else:
                     pixel_loss = self.lambda_pixel * l1_loss
 
                 self.logger.info(f'pixel loss is {pixel_loss:.3f}')
+                self.pixel_ll.append(pixel_loss)
+
 
             g_gan_loss = g_w_gan_loss
 
@@ -210,7 +219,7 @@ class Trainer(object):
                                    + landmarks_loss \
                                    + pixel_loss \
                                    + w_loss
-
+            self.total_ll.append(total_g_not_gan_loss)
             self.logger.info(f'total G (not gan) loss is {total_g_not_gan_loss:.3f}')
             self.logger.info(f'G gan loss is {g_gan_loss:.3f}')
 
@@ -230,7 +239,16 @@ class Trainer(object):
             Writer.add_scalar('loss/w_loss', w_loss, step=self.num_epoch)
 
         if self.num_epoch%100==0:
-            wandb.log({"epoch": self.num_epoch, "id_loss": id_loss,"Lnd_loss": landmarks_loss,"l1_loss": l1_loss,"pixel_loss":pixel_loss,"total_g_not_gan_loss":total_g_not_gan_loss,"g_w_gan_loss":g_w_gan_loss, "gt_img": wandb.Image(id_img[0]) ,  "mask_img": wandb.Image(id_mask[0]) ,  "pred_img": wandb.Image(pred[0])})
+            wandb.log({"epoch": self.num_epoch, "id_loss": np.mean(self.id_ll),"Lnd_loss": np.mean(self.lnd_ll),
+            "l1_loss": np.mean(self.l1_ll),"pixel_loss":np.mean(self.pixel_ll),
+            "total_g_not_gan_loss":np.mean(self.total_ll),"g_w_gan_loss":g_w_gan_loss,
+             "gt_img": wandb.Image(id_img[0]) ,  "mask_img": wandb.Image(id_mask[0]) ,  "pred_img": wandb.Image(pred[0])})
+
+            self.id_ll=[]
+            self.lnd_ll=[]
+            self.l1_ll=[]
+            self.pixel_ll=[]
+            self.total_ll=[]
 
         
         if total_g_not_gan_loss != 0:
